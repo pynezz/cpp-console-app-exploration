@@ -1,23 +1,25 @@
 //
 // Created by k on 10.08.24.
 //
-
 // HttpHandler.cpp
 #include "HttpHandler.h"
 
 namespace networking {
 
-    HttpHandler::HttpHandler() {
-        // Constructor implementation
+    HttpHandler::HttpHandler() : request_({}) {
+        // Initialize HttpRequest with default values if needed
     }
 
-    std::string HttpHandler::handleRequest(const std::string& request) {
-        // Handle the HTTP request and return a response
-        // make a request to api.segmentationviolation.com?
-
-        return "HTTP/1.1 200 OK\nContent-Type: text/plain\n\nHello, World!";
+    std::string HttpHandler::handleRequest(const RequestData& requestData) {
+        // Use the HttpRequest object internally
+        request_.setRequestData(requestData);
+        std::string response = "HTTP/1.1 200 OK\nContent-Type: text/plain\n\n";
+        response += "Handled request for URL: " + request_.getRequestData().url + "\n";
+        return response;
     }
 
-    // Implement other methods here
+    const HttpRequest& HttpHandler::getHttpRequest() const {
+        return request_;
+    }
 
 } // namespace networking

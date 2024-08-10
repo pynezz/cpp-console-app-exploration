@@ -1,21 +1,22 @@
-//
-// Created by k on 10.08.24.
-//
 
 #ifndef HTTPHANDLER_H
 #define HTTPHANDLER_H
 
 #include <string>
+#include "HttpRequest.h"
 
 namespace networking {
 
     class HttpHandler {
     public:
         HttpHandler();
-        std::string handleRequest(const std::string& request);
 
+        std::string handleRequest(const RequestData& requestData);  // No need to fully qualify now
+
+        // Get the internal HttpRequest object
+        const HttpRequest& getHttpRequest() const;
     private:
-        // Private members and helper methods
+        HttpRequest request_;
     };
 
 } // namespace networking

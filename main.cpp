@@ -1,22 +1,33 @@
 #include <iostream>
-#include "HttpHandler.h"
 #include <random>
+#include <utility>
 
-int http() {
+#include "HttpHandler.h"
+
+int http(std::string bearer, std::string* targetUrl, ...) {
     using namespace std;    // nice
 
-    networking::HttpHandler handler; // define the handler from the namespace::Class
-    string res = handler.handleRequest("GET / HTTP/1.1");
-    // cout << res << endl;
+    // Initialize RequestData
+    networking::RequestData requestData = {
+        "GET",                             // method
+        *targetUrl,                           //
+        "C++/0.1",                 // userAgent
+        std::move(bearer),                 // authorization (move seems to move the allocated
+        {{"Content-Type", "application/json"}} // headers
+    };
 
-    random_device rd;
-    mt19937 gen(rd());
-    uniform_int_distribution<> distrib(0, 10);
-    // int randomValue = distrib(gen);
+    // Create an HttpHandler object
+    networking::HttpHandler handler;
 
-    if (distrib(gen) % 2 == 0) { // if the random num between 0-10 % 2 == 0
-        return 1;
-    }
+    std::cout << "\033[32mmessing with vectors\033[0m " << std::endl;
+    std::vector<int>* vec;
+    std::cout << &vec << std::endl;
+
+    // Handle the request using HttpHandler
+    std::string response = handler.handleRequest(requestData);
+
+    // Output the response
+    std::cout << response << std::endl;
 
     return 0;
 }
@@ -26,10 +37,35 @@ int main(int argc, char* argv[]) {
         std::cout << argv[i] << std::endl;
     }
 
-    std::cout << "Hello, World!" << std::endl;
+    int counter = 0;
+    std::map<std::string, std::string> headers = {{}};
+    std::string url = "127.0.0.1";
+    std::string method = "GET";
+    std::string bearer = "unset";
 
-    if (http() == 0) {
-        std::cout << "HTTP/1.1 200 OK\nContent-Type: text/plain\n\nHello, World!" << std::endl;
+    // loop through every argument passed to main
+    for (const char* arg: argv) {
+        switch(arg) {
+            // case "--header":    // check for specific args
+                // headers = arg[counter+1];
+            case "--url":
+                url = arg[counter+1];
+            case "--method":
+                method = arg[counter+1];
+            case "--bearer":
+                bearer = arg[counter+1];
+            default: std::cout << "unknown argument" << arg << std::endl;
+        }
+        counter++;
     }
+
+    std::cout
+    << "bearer: " << bearer << '\n' << "method: " <<
+    std::endl;
+
+    http(bearer, &url, method);
+
+    // std::cout << "Hello, World!" << std::endl;
+
     return 0;
 }
