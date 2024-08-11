@@ -3,16 +3,17 @@
 #include <utility>
 
 #include "HttpHandler.h"
+#include "../internal/internal.h"
 
 int http(std::string bearer, std::string* targetUrl, ...) {
     using namespace std;    // nice
 
     // Initialize RequestData
     networking::RequestData requestData = {
-        "GET",                             // method
-        *targetUrl,                           //
-        "C++/0.1",                 // userAgent
-        std::move(bearer),                 // authorization (move seems to move the allocated
+        "GET",                              // method
+        *targetUrl,                         // target
+        "C++/0.1",                          // userAgent
+        std::move(bearer),                    // authorization (move seems to move the allocated
         {{"Content-Type", "application/json"}} // headers
     };
 
@@ -37,26 +38,31 @@ int main(int argc, char* argv[]) {
         std::cout << argv[i] << std::endl;
     }
 
-    int counter = 0;
+    // int counter = 0;
     std::map<std::string, std::string> headers = {{}};
     std::string url = "127.0.0.1";
     std::string method = "GET";
     std::string bearer = "unset";
 
     // loop through every argument passed to main
-    for (const char* arg: argv) {
-        switch(arg) {
+    for (int i = 1; i < argc; ++i) {
+        char arg[2];
+        snprintf(arg, sizeof(arg), "%c", *argv[i]);
+
+        std::cout << "Char arg: " << arg << std::endl;
+
+        switch(arg[0]) {
             // case "--header":    // check for specific args
                 // headers = arg[counter+1];
-            case "--url":
-                url = arg[counter+1];
-            case "--method":
-                method = arg[counter+1];
-            case "--bearer":
-                bearer = arg[counter+1];
+            case 'u':
+                url = arg[++i];
+            case 'm':
+                method = arg[++i];
+            case 42:
+                bearer = arg[++i];
             default: std::cout << "unknown argument" << arg << std::endl;
         }
-        counter++;
+        // counter++;
     }
 
     std::cout
