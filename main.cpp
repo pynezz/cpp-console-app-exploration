@@ -1,3 +1,9 @@
+/* *************************************** *\
+*   Please note:                            *
+*    Much of this code won't make "sense".  *
+*    It's just a c++ exploration.           *
+\* *************************************** */
+
 #include <iostream>
 #include <random>
 #include <utility>
@@ -7,6 +13,12 @@
 
 int http(std::string bearer, std::string* targetUrl, ...) {
     using namespace std;    // nice
+
+    // set the target url to be a predefined one, if param set to 'predefined'
+    if (*targetUrl == "predefined") {
+        Internal::internal pre;
+        *targetUrl = pre.userAgent;
+    }
 
     // Initialize RequestData
     networking::RequestData requestData = {
@@ -34,11 +46,11 @@ int http(std::string bearer, std::string* targetUrl, ...) {
 }
 
 int main(int argc, char* argv[]) {
-    for (int i = 0; i < argc; ++i) {
-        std::cout << argv[i] << std::endl;
-    }
+    // for (int i = 0; i < argc; ++i) {
+    //     std::cout << argv[i] << std::endl;
+    // }
+    std::cout << "amount of args is " << argc << std::endl;
 
-    // int counter = 0;
     std::map<std::string, std::string> headers = {{}};
     std::string url = "127.0.0.1";
     std::string method = "GET";
@@ -46,32 +58,41 @@ int main(int argc, char* argv[]) {
 
     // loop through every argument passed to main
     for (int i = 1; i < argc; ++i) {
-        char arg[2];
-        snprintf(arg, sizeof(arg), "%c", *argv[i]);
-
-        std::cout << "Char arg: " << arg << std::endl;
-
-        switch(arg[0]) {
-            // case "--header":    // check for specific args
-                // headers = arg[counter+1];
-            case 'u':
-                url = arg[++i];
-            case 'm':
-                method = arg[++i];
-            case 42:
-                bearer = arg[++i];
-            default: std::cout << "unknown argument" << arg << std::endl;
+        if (argv[i][0] == '-' && argv[i][1] != '\0') {
+            switch (argv[i][1]) {
+                case 'u':
+                    std::cout << "case u!" << std::endl;
+                    url = argv[++i];
+                    continue;
+                case 0x6D:      // hex works too!
+                    method = argv[++i];
+                    continue;
+                case 66 + 32:   // ascii character + 32 for lowercase (just exploring)
+                    bearer = argv[++i];
+                    continue;
+                default:
+                    std::cerr << "unknown argument: '" << argv[i][1] << "'" << std::endl;
+                    break;
+            }
         }
-        // counter++;
     }
 
     std::cout
-    << "bearer: " << bearer << '\n' << "method: " <<
+    << "bearer: " << bearer << '\n' << "method: " << method <<
     std::endl;
 
-    http(bearer, &url, method);
+    if (method == "unset") {
+        std::cerr << "no bearer token set" << std::endl;
+        return 1;
+    }
 
-    // std::cout << "Hello, World!" << std::endl;
+    int res = http(bearer, &url, method);
 
+    // I miss having ternary operators when writing Go..
+    const std::string& result = res == 1
+        ? "\033[31mnoo, it didn't work out..\033[0m"
+        : "\033[32mgreat success\033[0m";
+
+    std::cout << result << std::endl;
     return 0;
 }
